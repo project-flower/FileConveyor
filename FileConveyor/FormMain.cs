@@ -12,6 +12,7 @@ namespace FileConveyor
     {
         #region Private Fields
 
+        private readonly Exception initializingException = null;
         private bool messageShowing = false;
 
         #endregion
@@ -56,20 +57,33 @@ namespace FileConveyor
             InitializeComponent();
             MaximumSize = new Size(int.MaxValue, Height);
             MinimumSize = Size;
-            Settings settings = Settings.Default;
-            string dateTimeSource_ = settings.DateTime;
 
-            if (dateTimeSource_ == DateTimeSources.FileCreated.ToString())
+            try
             {
-                dateTimeSource = DateTimeSources.FileCreated;
+                Settings settings = Settings.Default;
+                string dateTimeSource_ = settings.DateTime;
+
+                if (dateTimeSource_ == DateTimeSources.FileCreated.ToString())
+                {
+                    dateTimeSource = DateTimeSources.FileCreated;
+                }
+                else if (dateTimeSource_ == DateTimeSources.FileUpdated.ToString())
+                {
+                    dateTimeSource = DateTimeSources.FileUpdated;
+                }
+                else if (dateTimeSource_ == DateTimeSources.SystemClock.ToString())
+                {
+                    dateTimeSource = DateTimeSources.SystemClock;
+                }
+
+                if (settings.StartsImmediately)
+                {
+                    SetEnable(true);
+                }
             }
-            else if (dateTimeSource_ == DateTimeSources.FileUpdated.ToString())
+            catch (Exception exception)
             {
-                dateTimeSource = DateTimeSources.FileUpdated;
-            }
-            else if (dateTimeSource_ == DateTimeSources.SystemClock.ToString())
-            {
-                dateTimeSource = DateTimeSources.SystemClock;
+                initializingException = exception;
             }
         }
 
@@ -91,13 +105,26 @@ namespace FileConveyor
             }
             catch (Exception exception)
             {
-                ShowErrorMessage(exception.Message);
+                ShowErrorMessage(exception);
             }
         }
 
         private void SetEnable(bool enabled)
         {
-            if (!enabled)
+            if (enabled)
+            {
+                try
+                {
+                    fileSystemWatcher.Path = comboBoxTargetDirectory.Text;
+                    fileSystemWatcher.Filter = textBoxFilter.Text;
+                    fileSystemWatcher.EnableRaisingEvents = true;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+            else
             {
                 fileSystemWatcher.EnableRaisingEvents = false;
             }
@@ -114,13 +141,11 @@ namespace FileConveyor
             buttonDisable.Enabled = enabled;
             buttonEnable.Enabled = !enabled;
             buttonMoveNow.Enabled = !enabled;
+        }
 
-            if (enabled)
-            {
-                fileSystemWatcher.Path = comboBoxTargetDirectory.Text;
-                fileSystemWatcher.Filter = textBoxFilter.Text;
-                fileSystemWatcher.EnableRaisingEvents = true;
-            }
+        private void ShowErrorMessage(Exception exception)
+        {
+            ShowMessage(exception.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void ShowErrorMessage(string message)
@@ -165,7 +190,14 @@ namespace FileConveyor
 
         private void buttonEnable_Click(object sender, EventArgs e)
         {
-            SetEnable(true);
+            try
+            {
+                SetEnable(true);
+            }
+            catch (Exception exception)
+            {
+                ShowErrorMessage(exception.Message);
+            }
         }
 
         private void buttonMoveNow_Click(object sender, EventArgs e)
@@ -184,7 +216,7 @@ namespace FileConveyor
             }
             catch (Exception exception)
             {
-                ShowErrorMessage(exception.Message);
+                ShowErrorMessage(exception);
             }
         }
 
@@ -216,7 +248,7 @@ namespace FileConveyor
             }
             catch (Exception exception)
             {
-                ShowErrorMessage(exception.Message);
+                ShowErrorMessage(exception);
             }
         }
 
@@ -230,6 +262,14 @@ namespace FileConveyor
             }
             catch
             {
+            }
+        }
+
+        private void shown(object sender, EventArgs e)
+        {
+            if (initializingException != null)
+            {
+                ShowErrorMessage(initializingException);
             }
         }
     }

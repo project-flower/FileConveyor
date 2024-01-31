@@ -248,6 +248,7 @@
             this.Name = "FormMain";
             this.Text = "FileConveyor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.formClosing);
+            this.Shown += new System.EventHandler(this.shown);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.groupBoxDateTime.ResumeLayout(false);
             this.groupBoxDateTime.PerformLayout();
