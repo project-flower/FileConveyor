@@ -14,7 +14,7 @@ namespace FileConveyor
             try
             {
                 var fileInfo = new FileInfo(fileName);
-                string newFileName = pattern.Replace("*", fileInfo.Name);
+                string newFileName = pattern.Replace("*", Path.GetFileNameWithoutExtension(fileInfo.Name));
 
                 if (pattern.Contains("?"))
                 {
