@@ -13,6 +13,7 @@ namespace FileConveyor
     {
         #region Private Fields
 
+        private readonly char[] directorySeparators = new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar };
         private readonly Exception initializingException = null;
         private bool messageShowing = false;
         private readonly Queue<string> queueFiles = new Queue<string>();
@@ -80,6 +81,7 @@ namespace FileConveyor
 
                 if (settings.StartsImmediately)
                 {
+                    DoValidate(true);
                     SetEnable(true);
                 }
 
@@ -94,6 +96,24 @@ namespace FileConveyor
         #endregion
 
         #region Private Methods
+
+        private void DoValidate(bool throwException)
+        {
+            try
+            {
+                ValidatePaths();
+                ValidatePattern();
+            }
+            catch (Exception exception)
+            {
+                if (throwException)
+                {
+                    throw exception;
+                }
+
+                ShowErrorMessage(exception);
+            }
+        }
 
         private void MoveFile(string fileName, bool throwException)
         {
@@ -171,17 +191,55 @@ namespace FileConveyor
             return result;
         }
 
-        private bool ValidatePattern()
+        private void ValidatePaths()
+        {
+            DirectoryInfo targetDirectory;
+
+            try
+            {
+                targetDirectory = new DirectoryInfo(comboBoxTargetDirectory.Text.TrimEnd(directorySeparators));
+            }
+            catch
+            {
+                throw new Exception("The target directory is invalid.");
+            }
+
+            DirectoryInfo destination;
+
+            try
+            {
+                destination = new DirectoryInfo(comboBoxDestination.Text.TrimEnd(directorySeparators));
+            }
+            catch
+            {
+                throw new Exception("The target directory is invalid.");
+            }
+
+            if (!targetDirectory.Exists)
+            {
+                throw new Exception("Target directory does not exist.");
+            }
+
+            if (!destination.Exists)
+            {
+                throw new Exception("Destination directory does not exist.");
+            }
+
+            if (string.Compare(destination.FullName, targetDirectory.FullName, true) == 0)
+            {
+                throw new Exception("The target directory and destination cannot be the same.");
+            }
+        }
+
+        private void ValidatePattern()
         {
             string pattern = textBoxRename.Text;
 
             if (Regex.IsMatch(pattern, "\\*[^\\*]*\\*")
                 || Regex.IsMatch(pattern, "\\?[^\\?]*\\?"))
             {
-                return false;
+                throw new Exception("Specify no more than one asterisk or question mark.");
             }
-
-            return true;
         }
 
         #endregion
@@ -197,6 +255,7 @@ namespace FileConveyor
         {
             try
             {
+                DoValidate(true);
                 SetEnable(true);
             }
             catch (Exception exception)
@@ -207,11 +266,7 @@ namespace FileConveyor
 
         private void buttonMoveNow_Click(object sender, EventArgs e)
         {
-            if (!ValidatePattern())
-            {
-                ShowErrorMessage("Specify no more than one asterisk or question mark.");
-                return;
-            }
+            DoValidate(false);
 
             if (ShowMessage("Is it okay to move files all at once?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
                 != DialogResult.Yes) return;
