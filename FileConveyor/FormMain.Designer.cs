@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.labelTargetDirectory = new System.Windows.Forms.Label();
             this.comboBoxTargetDirectory = new System.Windows.Forms.ComboBox();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
@@ -41,11 +42,16 @@
             this.radioButtonSystem = new System.Windows.Forms.RadioButton();
             this.radioButtonFileCreated = new System.Windows.Forms.RadioButton();
             this.radioButtonFileUpdated = new System.Windows.Forms.RadioButton();
+            this.labelDelay = new System.Windows.Forms.Label();
+            this.numericUpDownDelay = new System.Windows.Forms.NumericUpDown();
+            this.checkBoxStartsImmediately = new System.Windows.Forms.CheckBox();
             this.buttonEnable = new System.Windows.Forms.Button();
             this.buttonDisable = new System.Windows.Forms.Button();
             this.buttonMoveNow = new System.Windows.Forms.Button();
+            this.timerDelay = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.groupBoxDateTime.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDelay)).BeginInit();
             this.SuspendLayout();
             // 
             // labelTargetDirectory
@@ -194,13 +200,47 @@
             this.radioButtonFileUpdated.Text = "File &Updated";
             this.radioButtonFileUpdated.UseVisualStyleBackColor = true;
             // 
+            // labelDelay
+            // 
+            this.labelDelay.AutoSize = true;
+            this.labelDelay.Location = new System.Drawing.Point(12, 210);
+            this.labelDelay.Name = "labelDelay";
+            this.labelDelay.Size = new System.Drawing.Size(73, 12);
+            this.labelDelay.TabIndex = 9;
+            this.labelDelay.Text = "De&lay(msec.):";
+            // 
+            // numericUpDownDelay
+            // 
+            this.numericUpDownDelay.Location = new System.Drawing.Point(91, 208);
+            this.numericUpDownDelay.Maximum = new decimal(new int[] {
+            9999999,
+            0,
+            0,
+            0});
+            this.numericUpDownDelay.Name = "numericUpDownDelay";
+            this.numericUpDownDelay.Size = new System.Drawing.Size(120, 19);
+            this.numericUpDownDelay.TabIndex = 10;
+            this.numericUpDownDelay.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // checkBoxStartsImmediately
+            // 
+            this.checkBoxStartsImmediately.AutoSize = true;
+            this.checkBoxStartsImmediately.Checked = global::FileConveyor.Properties.Settings.Default.StartsImmediately;
+            this.checkBoxStartsImmediately.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::FileConveyor.Properties.Settings.Default, "StartsImmediately", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.checkBoxStartsImmediately.Location = new System.Drawing.Point(12, 233);
+            this.checkBoxStartsImmediately.Name = "checkBoxStartsImmediately";
+            this.checkBoxStartsImmediately.Size = new System.Drawing.Size(120, 16);
+            this.checkBoxStartsImmediately.TabIndex = 11;
+            this.checkBoxStartsImmediately.Text = "Starts &Immediately";
+            this.checkBoxStartsImmediately.UseVisualStyleBackColor = true;
+            // 
             // buttonEnable
             // 
             this.buttonEnable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEnable.Location = new System.Drawing.Point(551, 208);
+            this.buttonEnable.Location = new System.Drawing.Point(551, 255);
             this.buttonEnable.Name = "buttonEnable";
             this.buttonEnable.Size = new System.Drawing.Size(75, 23);
-            this.buttonEnable.TabIndex = 9;
+            this.buttonEnable.TabIndex = 12;
             this.buttonEnable.Text = "&Enable";
             this.buttonEnable.UseVisualStyleBackColor = true;
             this.buttonEnable.Click += new System.EventHandler(this.buttonEnable_Click);
@@ -209,10 +249,10 @@
             // 
             this.buttonDisable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonDisable.Enabled = false;
-            this.buttonDisable.Location = new System.Drawing.Point(632, 208);
+            this.buttonDisable.Location = new System.Drawing.Point(632, 255);
             this.buttonDisable.Name = "buttonDisable";
             this.buttonDisable.Size = new System.Drawing.Size(75, 23);
-            this.buttonDisable.TabIndex = 10;
+            this.buttonDisable.TabIndex = 13;
             this.buttonDisable.Text = "&Disable";
             this.buttonDisable.UseVisualStyleBackColor = true;
             this.buttonDisable.Click += new System.EventHandler(this.buttonDisable_Click);
@@ -220,22 +260,29 @@
             // buttonMoveNow
             // 
             this.buttonMoveNow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonMoveNow.Location = new System.Drawing.Point(713, 208);
+            this.buttonMoveNow.Location = new System.Drawing.Point(713, 255);
             this.buttonMoveNow.Name = "buttonMoveNow";
             this.buttonMoveNow.Size = new System.Drawing.Size(75, 23);
-            this.buttonMoveNow.TabIndex = 11;
+            this.buttonMoveNow.TabIndex = 14;
             this.buttonMoveNow.Text = "Move &Now";
             this.buttonMoveNow.UseVisualStyleBackColor = true;
             this.buttonMoveNow.Click += new System.EventHandler(this.buttonMoveNow_Click);
+            // 
+            // timerDelay
+            // 
+            this.timerDelay.Tick += new System.EventHandler(this.timerDelay_Tick);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 243);
+            this.ClientSize = new System.Drawing.Size(800, 290);
             this.Controls.Add(this.buttonMoveNow);
             this.Controls.Add(this.buttonDisable);
             this.Controls.Add(this.buttonEnable);
+            this.Controls.Add(this.checkBoxStartsImmediately);
+            this.Controls.Add(this.numericUpDownDelay);
+            this.Controls.Add(this.labelDelay);
             this.Controls.Add(this.groupBoxDateTime);
             this.Controls.Add(this.textBoxRename);
             this.Controls.Add(this.labelRename);
@@ -252,6 +299,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
             this.groupBoxDateTime.ResumeLayout(false);
             this.groupBoxDateTime.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDelay)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -272,9 +320,13 @@
         private System.Windows.Forms.RadioButton radioButtonSystem;
         private System.Windows.Forms.RadioButton radioButtonFileCreated;
         private System.Windows.Forms.RadioButton radioButtonFileUpdated;
+        private System.Windows.Forms.Label labelDelay;
+        private System.Windows.Forms.NumericUpDown numericUpDownDelay;
+        private System.Windows.Forms.CheckBox checkBoxStartsImmediately;
         private System.Windows.Forms.Button buttonMoveNow;
         private System.Windows.Forms.Button buttonDisable;
         private System.Windows.Forms.Button buttonEnable;
+        private System.Windows.Forms.Timer timerDelay;
     }
 }
 

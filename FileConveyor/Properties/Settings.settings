@@ -5,6 +5,9 @@
     <Setting Name="DateTime" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Delay" Type="System.UInt16" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
     <Setting Name="Destination" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -13,6 +16,9 @@
     </Setting>
     <Setting Name="Rename" Type="System.String" Scope="User">
       <Value Profile="(Default)">*_?</Value>
+    </Setting>
+    <Setting Name="StartsImmediately" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="TargetDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

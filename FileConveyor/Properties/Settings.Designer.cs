@@ -37,6 +37,18 @@ namespace FileConveyor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public ushort Delay {
+            get {
+                return ((ushort)(this["Delay"]));
+            }
+            set {
+                this["Delay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Destination {
             get {
@@ -68,6 +80,18 @@ namespace FileConveyor.Properties {
             }
             set {
                 this["Rename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StartsImmediately {
+            get {
+                return ((bool)(this["StartsImmediately"]));
+            }
+            set {
+                this["StartsImmediately"] = value;
             }
         }
         

@@ -1,6 +1,7 @@
 ﻿using FileConveyor.Constants;
 using FileConveyor.Properties;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -14,6 +15,7 @@ namespace FileConveyor
 
         private readonly Exception initializingException = null;
         private bool messageShowing = false;
+        private readonly Queue<string> queueFiles = new Queue<string>();
 
         #endregion
 
@@ -80,6 +82,8 @@ namespace FileConveyor
                 {
                     SetEnable(true);
                 }
+
+                numericUpDownDelay.Value = settings.Delay;
             }
             catch (Exception exception)
             {
@@ -91,20 +95,19 @@ namespace FileConveyor
 
         #region Private Methods
 
-        private void MoveFile(string fileName, string destination, string pattern)
+        private void MoveFile(string fileName, bool throwException)
         {
-            if (!ValidatePattern())
-            {
-                ShowErrorMessage("Specify no more than one asterisk or question mark.");
-                return;
-            }
-
             try
             {
-                FileOperator.MoveFile(fileName, destination, pattern, dateTimeSource);
+                FileOperator.MoveFile(fileName, comboBoxDestination.Text, textBoxRename.Text, dateTimeSource);
             }
             catch (Exception exception)
             {
+                if (throwException)
+                {
+                    throw exception;
+                }
+
                 ShowErrorMessage(exception);
             }
         }
@@ -138,6 +141,8 @@ namespace FileConveyor
             labelRename.Enabled = !enabled;
             textBoxRename.Enabled = !enabled;
             groupBoxDateTime.Enabled = !enabled;
+            labelDelay.Enabled = !enabled;
+            numericUpDownDelay.Enabled = !enabled;
             buttonDisable.Enabled = enabled;
             buttonEnable.Enabled = !enabled;
             buttonMoveNow.Enabled = !enabled;
@@ -202,21 +207,28 @@ namespace FileConveyor
 
         private void buttonMoveNow_Click(object sender, EventArgs e)
         {
-            if (ShowMessage("Is it okay to move files all at once?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-
-            string destination = comboBoxDestination.Text;
-            string pattern = textBoxRename.Text;
-
-            try
+            if (!ValidatePattern())
             {
-                foreach (string fileName in Directory.EnumerateFiles(comboBoxTargetDirectory.Text, textBoxFilter.Text))
-                {
-                    MoveFile(fileName, destination, pattern);
-                }
+                ShowErrorMessage("Specify no more than one asterisk or question mark.");
+                return;
             }
-            catch (Exception exception)
+
+            if (ShowMessage("Is it okay to move files all at once?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+                != DialogResult.Yes) return;
+
+            foreach (string fileName in Directory.EnumerateFiles(comboBoxTargetDirectory.Text, textBoxFilter.Text))
             {
-                ShowErrorMessage(exception);
+                try
+                {
+                    MoveFile(fileName, true);
+                }
+                catch (Exception exception)
+                {
+                    ShowErrorMessage(exception);
+
+                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                        != DialogResult.Yes) break;
+                }
             }
         }
 
@@ -227,7 +239,7 @@ namespace FileConveyor
                 return;
             }
 
-            (sender as ComboBox).Text = dropData[0];
+                (sender as ComboBox).Text = dropData[0];
         }
 
         private void comboBoxDirectory_DragEnter(object sender, DragEventArgs e)
@@ -242,14 +254,19 @@ namespace FileConveyor
         {
             if (e.ChangeType != WatcherChangeTypes.Created) return;
 
-            try
+            int delay = (int)numericUpDownDelay.Value;
+            string fileName = e.FullPath;
+
+            if (delay > 0)
             {
-                MoveFile(e.FullPath, comboBoxDestination.Text, textBoxRename.Text);
+                timerDelay.Stop();
+                queueFiles.Enqueue(fileName);
+                timerDelay.Interval = delay;
+                timerDelay.Start();
+                return;
             }
-            catch (Exception exception)
-            {
-                ShowErrorMessage(exception);
-            }
+
+            MoveFile(fileName, false);
         }
 
         private void formClosing(object sender, FormClosingEventArgs e)
@@ -258,6 +275,7 @@ namespace FileConveyor
             {
                 Settings settings = Settings.Default;
                 settings.DateTime = dateTimeSource.ToString();
+                settings.Delay = (ushort)numericUpDownDelay.Value;
                 settings.Save();
             }
             catch
@@ -271,6 +289,32 @@ namespace FileConveyor
             {
                 ShowErrorMessage(initializingException);
             }
+        }
+
+        private void timerDelay_Tick(object sender, EventArgs e)
+        {
+            timerDelay.Stop();
+
+            while (queueFiles.Count > 0)
+            {
+                try
+                {
+                    MoveFile(queueFiles.Dequeue(), true);
+                }
+                catch (Exception exception)
+                {
+                    ShowErrorMessage(exception);
+
+                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                        != DialogResult.Yes)
+                    {
+                        queueFiles.Clear();
+                        break;
+                    }
+                }
+            }
+
+            queueFiles.TrimExcess();
         }
     }
 }
