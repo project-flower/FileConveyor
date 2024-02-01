@@ -271,8 +271,18 @@ namespace FileConveyor
             if (ShowMessage("Is it okay to move files all at once?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
                 != DialogResult.Yes) return;
 
+            bool errorOccurred = false;
+
             foreach (string fileName in Directory.EnumerateFiles(comboBoxTargetDirectory.Text, textBoxFilter.Text))
             {
+                if (errorOccurred)
+                {
+                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                        != DialogResult.Yes) break;
+
+                    errorOccurred = false;
+                }
+
                 try
                 {
                     MoveFile(fileName, true);
@@ -280,9 +290,7 @@ namespace FileConveyor
                 catch (Exception exception)
                 {
                     ShowErrorMessage(exception);
-
-                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                        != DialogResult.Yes) break;
+                    errorOccurred = true;
                 }
             }
         }
@@ -349,9 +357,22 @@ namespace FileConveyor
         private void timerDelay_Tick(object sender, EventArgs e)
         {
             timerDelay.Stop();
+            bool errorOccurred = false;
 
             while (queueFiles.Count > 0)
             {
+                if (errorOccurred)
+                {
+                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                        != DialogResult.Yes)
+                    {
+                        queueFiles.Clear();
+                        break;
+                    }
+
+                    errorOccurred = false;
+                }
+
                 try
                 {
                     MoveFile(queueFiles.Dequeue(), true);
@@ -359,13 +380,7 @@ namespace FileConveyor
                 catch (Exception exception)
                 {
                     ShowErrorMessage(exception);
-
-                    if (ShowMessage("Do you want to continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                        != DialogResult.Yes)
-                    {
-                        queueFiles.Clear();
-                        break;
-                    }
+                    errorOccurred = true;
                 }
             }
 
