@@ -16,7 +16,7 @@ namespace FileConveyor
         private readonly char[] directorySeparators = new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar };
         private readonly Exception initializingException = null;
         private bool messageShowing = false;
-        private readonly Queue<string> queueFiles = new Queue<string>();
+        private readonly List<string> queueFiles = new List<string>();
 
         #endregion
 
@@ -112,6 +112,30 @@ namespace FileConveyor
                 }
 
                 ShowErrorMessage(exception);
+            }
+        }
+
+        private void HandleFileCreated(string fileName)
+        {
+            int delay = (int)numericUpDownDelay.Value;
+
+            if (delay > 0)
+            {
+                timerDelay.Stop();
+                queueFiles.Add(fileName);
+                timerDelay.Interval = delay;
+                timerDelay.Start();
+                return;
+            }
+
+            MoveFile(fileName, false);
+        }
+
+        private void HandleFileDeleted(string fileName)
+        {
+            if (numericUpDownDelay.Value > 0)
+            {
+                queueFiles.Remove(fileName);
             }
         }
 
@@ -317,19 +341,22 @@ namespace FileConveyor
         {
             if (e.ChangeType != WatcherChangeTypes.Created) return;
 
-            int delay = (int)numericUpDownDelay.Value;
-            string fileName = e.FullPath;
+            HandleFileCreated(e.FullPath);
+        }
 
-            if (delay > 0)
-            {
-                timerDelay.Stop();
-                queueFiles.Enqueue(fileName);
-                timerDelay.Interval = delay;
-                timerDelay.Start();
-                return;
-            }
+        private void fileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            if (e.ChangeType != WatcherChangeTypes.Deleted) return;
 
-            MoveFile(fileName, false);
+            HandleFileDeleted(e.FullPath);
+        }
+
+        private void fileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            if (e.ChangeType != WatcherChangeTypes.Renamed) return;
+
+            HandleFileDeleted(e.OldFullPath);
+            HandleFileCreated(e.FullPath);
         }
 
         private void formClosing(object sender, FormClosingEventArgs e)
@@ -375,7 +402,9 @@ namespace FileConveyor
 
                 try
                 {
-                    MoveFile(queueFiles.Dequeue(), true);
+                    string fileName = queueFiles[0];
+                    queueFiles.Remove(fileName);
+                    MoveFile(fileName, true);
                 }
                 catch (Exception exception)
                 {

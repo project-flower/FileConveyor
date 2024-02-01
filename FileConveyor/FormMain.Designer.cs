@@ -85,6 +85,8 @@
             this.fileSystemWatcher.EnableRaisingEvents = true;
             this.fileSystemWatcher.SynchronizingObject = this;
             this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Created);
+            this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
+            this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
             // 
             // labelFilter
             // 
