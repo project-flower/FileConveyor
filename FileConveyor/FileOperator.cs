@@ -35,25 +35,25 @@ namespace FileConveyor
                     }
 
                     newFileName = newFileName.Replace("?", dateTime.ToString("yyyyMMddHHmmss"));
+                }
 
-                    var shFileOpStruct = new SHFILEOPSTRUCT
-                    {
-                        hwnd = IntPtr.Zero,
-                        pFrom = $"{fileName}\0",
-                        pTo = $"{Path.Combine(destination, newFileName)}{fileInfo.Extension}\0",
-                        wFunc = FO.MOVE,
-                        fFlags = (FILEOP_FLAGS.FOF_ALLOWUNDO | FILEOP_FLAGS.FOF_SILENT),
-                        fAnyOperationsAborted = false,
-                        hNameMappings = IntPtr.Zero,
-                        lpszProgressTitle = string.Empty
-                    };
+                var shFileOpStruct = new SHFILEOPSTRUCT
+                {
+                    hwnd = IntPtr.Zero,
+                    pFrom = $"{fileName}\0",
+                    pTo = $"{Path.Combine(destination, newFileName)}{fileInfo.Extension}\0",
+                    wFunc = FO.MOVE,
+                    fFlags = (FILEOP_FLAGS.FOF_ALLOWUNDO | FILEOP_FLAGS.FOF_SILENT),
+                    fAnyOperationsAborted = false,
+                    hNameMappings = IntPtr.Zero,
+                    lpszProgressTitle = string.Empty
+                };
 
-                    int result = Shell32.SHFileOperation(ref shFileOpStruct);
+                int result = Shell32.SHFileOperation(ref shFileOpStruct);
 
-                    if (result != 0)
-                    {
-                        throw new Exception(string.Format("File operation failed. (code: 0x{0:X4})", result));
-                    }
+                if (result != 0)
+                {
+                    throw new Exception(string.Format("File operation failed. (code: 0x{0:X4})", result));
                 }
             }
             catch
