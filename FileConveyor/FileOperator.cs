@@ -37,11 +37,23 @@ namespace FileConveyor
                     newFileName = newFileName.Replace("?", dateTime.ToString("yyyyMMddHHmmss"));
                 }
 
+                string newFileFullName = $"{Path.Combine(destination, newFileName)}{fileInfo.Extension}";
+
+                for (int i = 0; File.Exists(newFileFullName); ++i)
+                {
+                    if (i == int.MaxValue)
+                    {
+                        throw new Exception("Unable to generate copy destination file name.");
+                    }
+
+                    newFileFullName = $"{Path.Combine(destination, newFileName)} - ({i}){fileInfo.Extension}";
+                }
+
                 var shFileOpStruct = new SHFILEOPSTRUCT
                 {
                     hwnd = IntPtr.Zero,
                     pFrom = $"{fileName}\0",
-                    pTo = $"{Path.Combine(destination, newFileName)}{fileInfo.Extension}\0",
+                    pTo = $"{newFileFullName}\0",
                     wFunc = FO.MOVE,
                     fFlags = (FILEOP_FLAGS.FOF_ALLOWUNDO | FILEOP_FLAGS.FOF_SILENT),
                     fAnyOperationsAborted = false,
