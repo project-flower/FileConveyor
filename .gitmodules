@@ -1,0 +1,3 @@
+[submodule "FileOpenDialog"]
+	path = FileOpenDialog
+	url = https://github.com/project-flower/FileOpenDialog.git

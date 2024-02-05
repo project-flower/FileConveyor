@@ -17,6 +17,7 @@ namespace FileConveyor
         private readonly Exception initializingException = null;
         private bool messageShowing = false;
         private readonly List<string> queueFiles = new List<string>();
+        private readonly SelectDirectoryDialog selectDirectoryDialog = new SelectDirectoryDialog(true);
 
         #endregion
 
@@ -97,6 +98,15 @@ namespace FileConveyor
 
         #region Private Methods
 
+        private void DoBrowseDirectory(ComboBox comboBox)
+        {
+            selectDirectoryDialog.DirectoryName = comboBox.Text;
+
+            if (selectDirectoryDialog.ShowDialog(this) != DialogResult.OK) return;
+
+            comboBox.Text = selectDirectoryDialog.DirectoryName;
+        }
+        
         private void DoValidate(bool throwException)
         {
             try
@@ -270,6 +280,16 @@ namespace FileConveyor
 
         // Designer's Methods
 
+        private void buttonBrowseDestination_Click(object sender, EventArgs e)
+        {
+            DoBrowseDirectory(comboBoxDestination);
+        }
+
+        private void buttonBrowseTargetDirectory_Click(object sender, EventArgs e)
+        {
+            DoBrowseDirectory(comboBoxTargetDirectory);
+        }
+
         private void buttonDisable_Click(object sender, EventArgs e)
         {
             SetEnable(false);
@@ -357,6 +377,11 @@ namespace FileConveyor
 
             HandleFileDeleted(e.OldFullPath);
             HandleFileCreated(e.FullPath);
+        }
+
+        private void formClosed(object sender, FormClosedEventArgs e)
+        {
+            selectDirectoryDialog.Dispose();
         }
 
         private void formClosing(object sender, FormClosingEventArgs e)
