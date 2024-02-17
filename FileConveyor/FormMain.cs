@@ -65,6 +65,19 @@ namespace FileConveyor
             try
             {
                 Settings settings = Settings.Default;
+
+                if (!settings.Upgraded)
+                {
+                    try
+                    {
+                        settings.Upgrade();
+                        settings.Upgraded = true;
+                    }
+                    catch
+                    {
+                    }
+                }
+
                 string dateTimeSource_ = settings.DateTime;
 
                 if (dateTimeSource_ == DateTimeSources.FileCreated.ToString())
