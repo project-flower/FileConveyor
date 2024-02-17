@@ -186,20 +186,10 @@ namespace FileConveyor
                 fileSystemWatcher.EnableRaisingEvents = false;
             }
 
-            labelTargetDirectory.Enabled = !enabled;
-            comboBoxTargetDirectory.Enabled = !enabled;
-            labelFilter.Enabled = !enabled;
-            textBoxFilter.Enabled = !enabled;
-            labelDestination.Enabled = !enabled;
-            comboBoxDestination.Enabled = !enabled;
-            labelRename.Enabled = !enabled;
-            textBoxRename.Enabled = !enabled;
-            groupBoxDateTime.Enabled = !enabled;
-            labelDelay.Enabled = !enabled;
-            numericUpDownDelay.Enabled = !enabled;
-            buttonDisable.Enabled = enabled;
-            buttonEnable.Enabled = !enabled;
-            buttonMoveNow.Enabled = !enabled;
+            foreach (Control control in Controls)
+            {
+                control.Enabled = ((control == buttonDisable) ? enabled : !enabled);
+            }
         }
 
         private void ShowErrorMessage(Exception exception)
